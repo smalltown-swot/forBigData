@@ -65,6 +65,28 @@ public class ISearchServiceImpl extends ServiceImpl<LawMapper, Law> implements I
 
     }
 
+    @Override
+    public PageResult search(String caseName) throws IOException {
+        /*
+        //创建request对象
+        GetRequest request = new GetRequest("law", caseName);
+        //请求并得到响应
+        GetResponse response = client.get(request, RequestOptions.DEFAULT);
+        //解析
+        String json = response.getSourceAsString();
+        LawDoc lawDoc = JSON.parseObject(json, LawDoc.class);
+        return lawDoc;
+
+        */
+        SearchRequest request = new SearchRequest("law");
+        request.source()
+                //字段名，搜索内容
+                .query(QueryBuilders.matchQuery("caseName",caseName));
+        SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+        return handleResponse(response);
+    }
+
+
     private PageResult handleResponse(SearchResponse response) {
         //解析
         //1. 拿到hits
