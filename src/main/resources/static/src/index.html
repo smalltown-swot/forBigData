@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>刑事文书</title>
+    <style>
+        /* 自定义 CSS */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .new-header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: #b22222;
+            color: #fff;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+        }
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .header-right {
+            display: flex;
+            justify-content: flex-end;
+        }
+        .header-right a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px;
+            width: 200px;
+            text-align: center;
+        }
+        .header-right a:hover {
+            background-color: #a21a1a;
+        }
+
+        #ht-site-container {
+            padding-top: 60px; /* 调整此填充以匹配标题高度 */
+        }
+        #page-header {
+            height: 259px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background-color: #d32f2f;
+        }
+        #page-header-title {
+            margin: 0;
+            font-size: 50px;
+            color: white;
+        }
+        .search {
+            margin-top: 20px; /* 适当的顶部间距 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column; /* 垂直排列 */
+        }
+        .searchform {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .search-options {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px; /* 增加顶部间距 */
+        }
+        .search-options label {
+            margin: 0 10px;
+        }
+        #s {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 5px;
+            width: 810px;
+            height: 40px;
+        }
+        #searchsubmit {
+            background-color: #b22222;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 92px;
+            height: 54px;
+        }
+        #searchsubmit img {
+            vertical-align: middle;
+            margin-right: 5px;
+        }
+        #search-results {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .ht-kb-category {
+            flex: 0 0 48%;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #f5f5f5;
+        }
+        .ht-kb-category-title {
+            margin: 0;
+            font-size: 20px;
+            color: #333;
+            font-weight: bold;
+        }
+        .case-info {
+            font-size: 16px;
+            color: #666;
+            margin-top: 10px;
+        }
+        .case-info b {
+            color: #333;
+        }
+        .highlight {
+            background-color: yellow;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .pagination button {
+            background-color: #b22222;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            margin: 0 5px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .pagination button:hover {
+            background-color: #a21a1a;
+        }
+    </style>
+</head>
+
+<body class="archive post-type-archive post-type-archive-ht_kb">
+<div id="ht-site-container" class="clearfix">
+    <div>
+        <header class="new-header" id="menu">
+            <div class="header-content">
+                <div class="header-right" id="nav">
+                    <a href="index.html">首页</a>
+                    <a href="details.html">裁判文书</a>
+                </div>
+            </div>
+        </header>
+    </div>
+    <section id="page-header" class="clearfix">
+        <div class="ht-container">
+            <h1 id="page-header-title">裁判文书</h1>
+            <div class="search">
+                <form class="searchform" id="searchform" method="get" action="">
+                    <input type="text" value="" placeholder="输入关键词..." name="query" id="s" autocomplete="off"/>
+                    <button type="submit" id="searchsubmit">
+                        <img alt="" src="/images/search-icon.png" width="16" height="16">
+                        <span>检索</span>
+                    </button>
+
+
+                </form>
+                <div class="search-options">
+                    <label><input type="radio" name="searchType" value="caseID" checked> 按案件号搜索</label>
+                    <label><input type="radio" name="searchType" value="caseName"> 按案件名搜索</label>
+                    <label><input type="radio" name="searchType" value="text"> 按全文搜索</label>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div id="primary" class="sidebar-right clearfix">
+        <div class="ht-container">
+            <main id="content">
+                <div id="ht-kb" class="ht-kb-archive">
+                    <div id="search-results"></div>
+                </div>
+                <div id="pagination" class="pagination"></div>
+            </main>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchForm = document.getElementById('searchform');
+        const searchResults = document.getElementById('search-results');
+        const pagination = document.getElementById('pagination');
+        const searchInput = document.getElementById('s');
+        const searchTypeInputs = document.querySelectorAll('input[name="searchType"]');
+
+        let currentPage = 1;
+        const resultsPerPage = 2;
+        let currentSearchType = 'caseID'; // 默认搜索类型
+
+        searchForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            const query = searchInput.value.trim();
+            if (query !== '') {
+                fetchSearchResults(query, currentSearchType, currentPage);
+            } else {
+                alert('请输入关键词进行搜索。');
+            }
+        });
+
+        searchTypeInputs.forEach(input => {
+            input.addEventListener('change', function () {
+                currentSearchType = this.value;
+            });
+        });
+
+        function fetchSearchResults(query, searchType, page) {
+            let apiUrl = '';
+
+            switch (searchType) {
+                case 'caseID':
+                    apiUrl = `http://localhost:8089/law/id/${encodeURIComponent(query)}`;
+                    break;
+                case 'caseName':
+                    apiUrl = `http://localhost:8089/law/${encodeURIComponent(query)}`;
+                    break;
+                case 'text':
+                    apiUrl = `http://localhost:8089/law/all/${encodeURIComponent(query)}`;
+                    break;
+                default:
+                    apiUrl =  `http://localhost:8089/law/all/${encodeURIComponent(query)}`;// 默认选择按案件号搜索
+                    break;
+            }
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    displayResults(data.laws, page, data.total, query);
+                })
+                .catch(error => {
+                    console.error('获取搜索结果时出错：', error);
+                });
+        }
+
+        function displayResults(results, page, totalResults, query) {
+            searchResults.innerHTML = '';
+            if (results.length === 0) {
+                searchResults.innerHTML = '<p>未找到相关的裁判文书。</p>';
+                return;
+            }
+
+            const startIndex = (page - 1) * resultsPerPage;
+            const endIndex = startIndex + resultsPerPage;
+            const paginatedResults = results.slice(startIndex, endIndex);
+
+            paginatedResults.forEach(result => {
+                const articleDiv = document.createElement('div');
+                articleDiv.className = 'ht-kb-category';
+
+                // 只有在数据存在时才添加信息
+                if (result.caseName) {
+                    articleDiv.innerHTML += `<div class="ht-kb-category-title">案件名称：<a href="details.html?caseId=${result.caseId}" target="_blank">${highlight(result.caseName, query)}</a></div>`;
+                }
+                if (result.caseId) {
+                    articleDiv.innerHTML += `<div class="case-info"><b>案件号：</b> ${highlight(result.caseId, query)}</div>`;
+                }
+                if (result.plaintiff) {
+                    articleDiv.innerHTML += `<div class="case-info"><b>原告：</b> ${highlight(result.plaintiff, query)}</div>`;
+                }
+                if (result.defendant) {
+                    articleDiv.innerHTML += `<div class="case-info"><b>被告：</b> ${highlight(result.defendant, query)}</div>`;
+                }
+                if (result.plaintiffLawyer) {
+                    articleDiv.innerHTML += `<div class="case-info"><b>原告律师：</b> ${highlight(result.plaintiffLawyer, query)}</div>`;
+                }
+                if (result.defendantLawyer) {
+                    articleDiv.innerHTML += `<div class="case-info"><b>被告律师：</b> ${highlight(result.defendantLawyer, query)}</div>`;
+                }
+                if (result.court) {
+                    articleDiv.innerHTML += `<div class="case-info"><b>法院：</b> ${highlight(result.court, query)}</div>`;
+                }
+                if (result.judge) {
+                    articleDiv.innerHTML += `<div class="case-info"><b>判决：</b> ${highlight(result.judge, query)}</div>`;
+                }
+                if (result.causeOfAction) {
+                    articleDiv.innerHTML += `<div class="case-info"><b>案件性质：</b> ${highlight(result.causeOfAction, query)}</div>`;
+                }
+                if (result.judgementResult) {
+                    articleDiv.innerHTML += `<div class="case-info"><b>判决结果：</b> ${highlight(result.judgementResult, query)}</div>`;
+                }
+
+                if (result.text) {
+                    articleDiv.innerHTML += `<div class="case-info"><b>案件内容：</b> ${highlight(result.text.length > 100 ? result.text.substring(0, 100) + '...' : result.text, query)}</div>`;
+                }
+
+                searchResults.appendChild(articleDiv);
+            });
+
+            displayPagination(page, totalResults);
+        }
+
+        function displayPagination(currentPage, totalResults) {
+            const totalPages = Math.ceil(totalResults / resultsPerPage);
+            pagination.innerHTML = '';
+
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement('button');
+                button.innerText = i;
+                if (i === currentPage) {
+                    button.style.backgroundColor = '#a21a1a';
+                }
+                button.addEventListener('click', function () {
+                    fetchSearchResults(searchInput.value.trim(), currentSearchType, i);
+                });
+                pagination.appendChild(button);
+            }
+        }
+
+        function highlight(text, keyword) {
+            const regex = new RegExp(`(${keyword})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+    });
+</script>
+
+
+</body>
+</html>

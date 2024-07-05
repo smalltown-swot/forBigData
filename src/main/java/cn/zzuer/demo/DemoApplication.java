@@ -17,7 +17,7 @@ public class DemoApplication {
     @Bean
     public RestHighLevelClient client(){
         return new RestHighLevelClient(RestClient.builder(
-                HttpHost.create("http://192.168.79.130:9200")
+                HttpHost.create("http://124.220.133.42:9200")
         ));
     }
 }

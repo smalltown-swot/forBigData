@@ -28,8 +28,6 @@ public class Law {
     private String court;
     //法官
     private String judge;
-    //标签——————————目前打算废弃
-    //private List<String> label;
     //案由
     private String causeOfAction;
     //下面觉得枚举会更好

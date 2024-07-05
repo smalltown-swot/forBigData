@@ -12,6 +12,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -67,26 +68,49 @@ public class ISearchServiceImpl extends ServiceImpl<LawMapper, Law> implements I
 
     @Override
     public PageResult search(String caseName) throws IOException {
-        /*
-        //创建request对象
-        GetRequest request = new GetRequest("law", caseName);
-        //请求并得到响应
-        GetResponse response = client.get(request, RequestOptions.DEFAULT);
-        //解析
-        String json = response.getSourceAsString();
-        LawDoc lawDoc = JSON.parseObject(json, LawDoc.class);
-        return lawDoc;
 
-        */
         SearchRequest request = new SearchRequest("law");
         request.source()
                 //字段名，搜索内容
-                .query(QueryBuilders.matchQuery("caseName",caseName));
+                .highlighter(new HighlightBuilder().field("caseName")
+                        .requireFieldMatch(false))
+                .query(QueryBuilders.matchQuery("caseName",caseName))
+                .size(1000);
         SearchResponse response = client.search(request, RequestOptions.DEFAULT);
         return handleResponse(response);
     }
 
+    @Override
+    public PageResult searchAll(String key) throws IOException {
+        SearchRequest request = new SearchRequest("law");
+        request.source()
+                .highlighter(new HighlightBuilder().field("text")
+                        .requireFieldMatch(false))
+                .query(QueryBuilders.matchQuery("text",key))
+                .size(1000);
+        SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+        return handleResponse(response);
+    }
 
+    @Override
+    public PageResult getByCaseId(String caseId) throws IOException {
+        SearchRequest request = new SearchRequest("law");
+        System.out.println("__"+ caseId +"__");
+        request.source()
+                .highlighter(new HighlightBuilder().field("caseId")
+                        .requireFieldMatch(false))
+                .query(QueryBuilders.matchQuery("caseId", caseId))
+                .size(1000);
+        SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+        System.out.println(response);
+        return handleResponse(response);
+    }
+
+    //高亮回来debug一下，然后，那啥，精准搜索带上去
+    //基础功能做做就行了
+
+
+    //高亮结果解析
     private PageResult handleResponse(SearchResponse response) {
         //解析
         //1. 拿到hits
@@ -97,33 +121,36 @@ public class ISearchServiceImpl extends ServiceImpl<LawMapper, Law> implements I
         System.out.println("共搜索到"+total+"条数据");
         //3. 拿到文档数组
         SearchHit[] hits = searchHits.getHits();
-
         List<LawDoc> laws = new ArrayList<>();
         //4. 遍历数组并返回结果
         for (SearchHit hit : hits) {
-            //获取相应的source
+            //获取相应的source，source是源文档，不自带高亮
             String json = hit.getSourceAsString();
             //反序列化
             LawDoc lawDoc = JSON.parseObject(json, LawDoc.class);
             //获取高亮结果
             Map<String, HighlightField> highlightFields = hit.getHighlightFields();
+            //caseName高亮
             if (!CollectionUtils.isEmpty(highlightFields)) {
-                //根据字段名获取高亮结果
-                HighlightField highlightField = highlightFields.get("name");
+                //根据字段名获取高亮结果，这个key是字段名，和源文档的字段名相对应
+                HighlightField highlightField = highlightFields.get("caseName");
                 if (highlightField!=null) {
                     //获取高亮值
                     String name = highlightField.getFragments()[0].string();
                     //覆盖高亮结果
-
-                    //——————————？？？——————————以后改进
                     lawDoc.setCaseName(name);
+                }
+                HighlightField textField = highlightFields.get("text");
+                if (textField!=null) {
+                    //获取高亮值
+                    String text = textField.getFragments()[0].string();
+                    lawDoc.setText(text);
                 }
             }
             laws.add(lawDoc);
             //输出检验
             System.out.println(lawDoc);
         }
-
         //封装数据并返回
         return new PageResult(total,laws);
     }

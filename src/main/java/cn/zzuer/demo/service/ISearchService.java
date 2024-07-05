@@ -12,4 +12,9 @@ public interface ISearchService extends IService<Law> {
     PageResult search(RequestParams params) throws IOException;
 
     PageResult search(String name) throws IOException;
+
+    PageResult searchAll(String key) throws IOException;
+
+    PageResult getByCaseId(String caseId) throws IOException;
+
 }
