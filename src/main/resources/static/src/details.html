@@ -18,14 +18,16 @@
             padding: 20px;
             background-color: white;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            height: 695px;
+            min-height: 695px;
+            height: auto;
         }
         .case-details {
             border: 1px solid #ccc;
             border-radius: 4px;
             padding: 20px;
             background-color: #ffffff;
-            height: 650px;
+            min-height: 650px;
+            height: auto;
         }
         .case-title {
             font-size: 30px;
@@ -68,7 +70,7 @@
         }
 
         function fetchCaseDetails(caseId) {
-            fetch(`http://localhost:8089/law/id/${encodeURIComponent(caseId)}`)
+            fetch(`http://124.220.133.42:8089/law/id/${encodeURIComponent(caseId)}`)
                 .then(response => response.json())
                 .then(data => {
                     console.log(data);
@@ -83,13 +85,16 @@
 
         function displayCaseDetails(details) {
             const caseDetailsDiv = document.getElementById('case-details');
+            const caseContent = details.text.replace(/\r\n/g, '<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
+
+
             caseDetailsDiv.innerHTML = `<div class="case-title">案件名称：${details.caseName}</div>
                                         <div class="case-info">
                                             案件号：${details.caseId} | 法院：${details.court} | 案由：${details.causeOfAction}
                                         </div>
 
                                         <div class="case-content">
-                                            ${details.text}
+                                            ${caseContent}
                                         </div>`;
         }
     });

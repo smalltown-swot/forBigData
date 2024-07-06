@@ -233,16 +233,16 @@
 
             switch (searchType) {
                 case 'caseID':
-                    apiUrl = `http://localhost:8089/law/id/${encodeURIComponent(query)}`;
+                    apiUrl = `http://124.220.133.42:8089/law/id/${encodeURIComponent(query)}`;
                     break;
                 case 'caseName':
-                    apiUrl = `http://localhost:8089/law/${encodeURIComponent(query)}`;
+                    apiUrl = `http://124.220.133.42:8089/law/${encodeURIComponent(query)}`;
                     break;
                 case 'text':
-                    apiUrl = `http://localhost:8089/law/all/${encodeURIComponent(query)}`;
+                    apiUrl = `http://124.220.133.42:8089/law/all/${encodeURIComponent(query)}`;
                     break;
                 default:
-                    apiUrl =  `http://localhost:8089/law/all/${encodeURIComponent(query)}`;// 默认选择按案件号搜索
+                    apiUrl =  `http://124.220.133.42:8089/law/all/${encodeURIComponent(query)}`;// 默认选择按案件号搜索
                     break;
             }
 
